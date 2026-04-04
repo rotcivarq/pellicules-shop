@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "name": "Kodak Portra 400",
+    "format": "35mm",
+    "iso": 400,
+    "type": "Couleur",
+    "exp": "2026-08",
+    "price": 14,
+    "stock": 5
+  },
+  {
+    "id": 2,
+    "name": "Kodak Gold 200",
+    "format": "35mm",
+    "iso": 200,
+    "type": "Couleur",
+    "exp": "2025-12",
+    "price": 8,
+    "stock": 12
+  },
+  {
+    "id": 3,
+    "name": "Kodak Tri-X 400",
+    "format": "35mm",
+    "iso": 400,
+    "type": "N&B",
+    "exp": "2026-03",
+    "price": 12,
+    "stock": 3
+  },
+  {
+    "id": 4,
+    "name": "Ilford HP5 Plus",
+    "format": "35mm",
+    "iso": 400,
+    "type": "N&B",
+    "exp": "2027-01",
+    "price": 10,
+    "stock": 8
+  },
+  {
+    "id": 5,
+    "name": "Fujifilm Superia 400",
+    "format": "35mm",
+    "iso": 400,
+    "type": "Couleur",
+    "exp": "2025-06",
+    "price": 6,
+    "stock": 20
+  },
+  {
+    "id": 6,
+    "name": "Kodak Portra 160",
+    "format": "120",
+    "iso": 160,
+    "type": "Couleur",
+    "exp": "2026-05",
+    "price": 12,
+    "stock": 4
+  },
+  {
+    "id": 7,
+    "name": "Kodak Ektar 100",
+    "format": "35mm",
+    "iso": 100,
+    "type": "Couleur",
+    "exp": "2026-10",
+    "price": 13,
+    "stock": 6
+  },
+  {
+    "id": 8,
+    "name": "Ilford Delta 3200",
+    "format": "35mm",
+    "iso": 3200,
+    "type": "N&B",
+    "exp": "2025-09",
+    "price": 15,
+    "stock": 2
+  }
+]

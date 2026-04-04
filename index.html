@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pellicules en vente</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: #666;
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    .search-bar {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: white;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: #1a1a1a;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 20px;
+      flex-wrap: wrap;
+    }
+
+    .filters button {
+      padding: 6px 16px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filters button.active,
+    .filters button:hover {
+      background: #1a1a1a;
+      color: white;
+      border-color: #1a1a1a;
+    }
+
+    .grid {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .film-card {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .film-card:hover {
+      border-color: #ccc;
+    }
+
+    .film-card.out-of-stock {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .film-info h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .film-meta {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #888;
+    }
+
+    .film-meta span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .tag.couleur { background: #fef3c7; color: #92400e; }
+    .tag.nb { background: #e5e7eb; color: #374151; }
+
+    .film-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .film-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .film-stock {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .film-stock.low { color: #dc2626; font-weight: 500; }
+
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-control button {
+      width: 32px;
+      height: 32px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .qty-control button:hover {
+      background: #f5f5f5;
+    }
+
+    .qty-control .qty {
+      min-width: 20px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* Cart bar */
+    .cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 100;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .cart-bar.visible {
+      transform: translateY(0);
+    }
+
+    .cart-bar .cart-summary {
+      font-size: 0.95rem;
+    }
+
+    .cart-bar .cart-summary strong {
+      font-size: 1.15rem;
+    }
+
+    .cart-bar .btn-reserve {
+      padding: 10px 24px;
+      background: white;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cart-bar .btn-reserve:hover {
+      background: #f0f0f0;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+    }
+
+    .modal .recap-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+    }
+
+    .modal .recap-details {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .modal .recap-meta {
+      font-size: 0.82rem;
+      color: #888;
+    }
+
+    .modal .recap-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .modal form {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal input, .modal textarea {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .modal input:focus, .modal textarea:focus {
+      outline: none;
+      border-color: #1a1a1a;
+    }
+
+    .delivery-choice {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .delivery-choice label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.15s;
+    }
+
+    .delivery-choice label:has(input:checked) {
+      border-color: #1a1a1a;
+      background: #f5f5f5;
+    }
+
+    .delivery-choice input[type="radio"] {
+      accent-color: #1a1a1a;
+    }
+
+    .modal .btn-send {
+      padding: 14px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal .btn-send:hover {
+      background: #333;
+    }
+
+    .modal .btn-close {
+      margin-top: 8px;
+      padding: 10px;
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .confirmation {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .confirmation .check {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 0.95rem;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @media (max-width: 600px) {
+      .film-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .film-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Pellicules photo</h1>
+    <p>Stock perso en vente &mdash; Paris &mdash; retrait en main propre ou envoi</p>
+  </header>
+
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Rechercher une pellicule..." oninput="applyFilters()">
+  </div>
+
+  <div class="filters">
+    <button class="active" data-filter="all">Tout</button>
+    <button data-filter="Couleur">Couleur</button>
+    <button data-filter="N&B">N&B</button>
+    <button data-filter="35mm">35mm</button>
+    <button data-filter="120">120</button>
+  </div>
+
+  <div class="grid" id="grid">
+    <div class="loading">Chargement du stock...</div>
+  </div>
+
+  <div class="cart-bar" id="cart-bar">
+    <div class="cart-summary">
+      <span id="cart-count">0</span> pellicule(s) &mdash; <strong id="cart-total">0&euro;</strong>
+    </div>
+    <button class="btn-reserve" onclick="openModal()">Réserver</button>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal" onclick="event.stopPropagation()">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+<script>
+// REMPLACE CETTE URL par l'URL de ton Google Apps Script deployment
+const API_URL = 'https://script.google.com/macros/s/AKfycbzux072z3rILN8qyBJHfctNlENzcikm_0URDIZlefeKg6eIhR8ljxQNAdFnpn_1Py0WBw/exec';
+
+let stock = [];
+let cart = {};
+
+async function init() {
+  try {
+    const resp = await fetch(API_URL, { redirect: 'follow' });
+    const text = await resp.text();
+    stock = JSON.parse(text);
+  } catch (e) {
+    console.error('API error:', e);
+    try {
+      const resp = await fetch('stock.json');
+      stock = await resp.json();
+    } catch (e2) {
+      document.getElementById('grid').innerHTML = '<div class="empty">Erreur de chargement</div>';
+      return;
+    }
+  }
+  render();
+}
+
+function applyFilters() {
+  const filter = document.querySelector('.filters button.active')?.dataset.filter || 'all';
+  render(filter);
+}
+
+function render(filter = 'all') {
+  const grid = document.getElementById('grid');
+  const search = (document.getElementById('search')?.value || '').toLowerCase();
+  const filtered = stock.filter(f => {
+    const type = String(f.type).toLowerCase();
+    const format = String(f.format).toLowerCase();
+    const fl = filter.toLowerCase();
+    const matchFilter = filter === 'all'
+      || type === fl
+      || format === fl
+      || (fl === 'n&b' && (type === 'nb' || type === 'n&b' || type === 'noir et blanc'))
+      || (fl === 'couleur' && type === 'couleur')
+      || (fl === '120' && (format === '120' || format === 'moyen format'))
+      || (fl === '35mm' && (format === '35mm' || format === '35m'));
+    const searchWords = search.split(/\s+/).filter(w => w);
+    const searchable = `${f.name} ${type} ${format} ${f.iso}`.toLowerCase();
+    const matchSearch = searchWords.length === 0 || searchWords.every(w => searchable.includes(w));
+    return matchFilter && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty">Aucune pellicule dans cette categorie</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(f => {
+    const qty = cart[f.id] || 0;
+    const outOfStock = f.stock === 0;
+    const lowStock = f.stock <= 3 && f.stock > 0;
+    const type = String(f.type).toLowerCase();
+    const format = String(f.format).toLowerCase();
+    let expStr, expired = false;
+    const expVal = String(f.exp).toLowerCase();
+    if (!f.exp || expVal === 'inconnue') {
+      expStr = 'inconnue';
+    } else if (/^\d{4}$/.test(expVal)) {
+      expired = Number(expVal) < new Date().getFullYear();
+      expStr = expVal;
+    } else {
+      const expDate = new Date(f.exp);
+      if (isNaN(expDate.getTime())) {
+        expStr = String(f.exp);
+      } else {
+        expired = expDate < new Date();
+        expStr = expDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+      }
+    }
+    return `
+      <div class="film-card ${outOfStock ? 'out-of-stock' : ''}">
+        <div class="film-info">
+          <h3>${f.name}</h3>
+          <div class="film-meta">
+            <span class="tag ${type === 'nb' || type === 'n&b' ? 'nb' : 'couleur'}">${type === 'nb' || type === 'n&b' ? 'N&B' : 'Couleur'}</span>
+            <span>${f.format}</span>
+            <span>ISO ${f.iso}</span>
+            <span style="${expired || expStr === 'inconnue' ? 'color:#dc2626;font-weight:500' : ''}">Péremption : ${expStr}</span>
+          </div>
+        </div>
+        <div class="film-right">
+          <div>
+            <div class="film-price">${f.price}&euro;</div>
+            <div class="film-stock ${lowStock ? 'low' : ''}">${outOfStock ? 'Epuise' : f.stock + ' dispo'}</div>
+          </div>
+          <div class="qty-control">
+            <button onclick="updateCart(${f.id}, -1)" ${qty === 0 ? 'style="opacity:0.3"' : ''}>-</button>
+            <span class="qty">${qty}</span>
+            <button onclick="updateCart(${f.id}, 1)" ${qty >= f.stock ? 'style="opacity:0.3"' : ''}>+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateCart(id, delta) {
+  const film = stock.find(f => f.id === id);
+  const current = cart[id] || 0;
+  const next = Math.max(0, Math.min(film.stock, current + delta));
+
+  if (next === 0) {
+    delete cart[id];
+  } else {
+    cart[id] = next;
+  }
+
+  const activeFilter = document.querySelector('.filters button.active')?.dataset.filter || 'all';
+  render(activeFilter);
+  updateCartBar();
+}
+
+function updateCartBar() {
+  const bar = document.getElementById('cart-bar');
+  const entries = Object.entries(cart);
+  const count = entries.reduce((sum, [, qty]) => sum + qty, 0);
+  const total = entries.reduce((sum, [id, qty]) => {
+    const film = stock.find(f => f.id === parseInt(id));
+    return sum + (film.price * qty);
+  }, 0);
+
+  document.getElementById('cart-count').textContent = count;
+  document.getElementById('cart-total').textContent = total + '\u20ac';
+
+  bar.classList.toggle('visible', count > 0);
+}
+
+function openModal() {
+  const entries = Object.entries(cart);
+  if (entries.length === 0) return;
+
+  const items = entries.map(([id, qty]) => {
+    const film = stock.find(f => f.id === parseInt(id));
+    return { ...film, qty, subtotal: film.price * qty };
+  });
+  const total = items.reduce((sum, i) => sum + i.subtotal, 0);
+
+  function fmtExp(exp) {
+    const v = String(exp).toLowerCase();
+    if (!exp || v === 'inconnue') return 'inconnue';
+    if (/^\d{4}$/.test(v)) return v;
+    const d = new Date(exp);
+    if (isNaN(d.getTime())) return String(exp);
+    return d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  }
+
+  document.getElementById('modal-content').innerHTML = `
+    <h2>Récapitulatif</h2>
+    ${items.map(i => `
+      <div class="recap-item">
+        <div class="recap-details">
+          <strong>${i.name}</strong>
+          <span class="recap-meta">${String(i.format)} &middot; ISO ${i.iso} &middot; Péremption : ${fmtExp(i.exp)}</span>
+          <span class="recap-meta">Quantité : ${i.qty} &middot; ${i.subtotal}&euro;</span>
+        </div>
+      </div>
+    `).join('')}
+    <div class="recap-total">
+      <span>Total</span>
+      <span>${total}&euro;</span>
+    </div>
+    <form onsubmit="submitOrder(event)">
+      <input type="text" name="instagram" placeholder="Ton @ Instagram" required>
+      <div class="delivery-choice">
+        <label><input type="radio" name="delivery" value="main propre" required> Remise en main propre (Paris)</label>
+        <label><input type="radio" name="delivery" value="envoi"> Envoi postal</label>
+      </div>
+      <textarea name="message" rows="2" placeholder="Message (optionnel)"></textarea>
+      <button type="submit" class="btn-send">Envoyer la réservation</button>
+      <button type="button" class="btn-close" onclick="closeModal()">Annuler</button>
+    </form>
+  `;
+
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+function submitOrder(e) {
+  e.preventDefault();
+  const form = e.target;
+  const instagram = form.instagram.value.replace('@', '');
+  const delivery = form.delivery.value;
+  const message = form.message.value;
+
+  const orderItems = Object.entries(cart).map(([id, qty]) => {
+    const film = stock.find(f => f.id === parseInt(id));
+    return { id: film.id, name: film.name, qty, price: film.price };
+  });
+
+  const btn = form.querySelector('.btn-send');
+  btn.textContent = 'Envoi en cours...';
+  btn.disabled = true;
+
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      instagram: instagram,
+      delivery: delivery,
+      message: message,
+      items: orderItems
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('modal-content').innerHTML = `
+        <div class="confirmation">
+          <div class="check">&#10003;</div>
+          <h2>Réservation envoyée !</h2>
+          <p style="color:#666;margin-top:8px">Je te recontacte sur Insta !</p>
+          <button class="btn-close" onclick="closeModal()" style="margin-top:20px">Fermer</button>
+        </div>
+      `;
+      cart = {};
+      updateCartBar();
+      // Recharger le stock à jour
+      init();
+    } else {
+      alert('Stock insuffisant:\\n' + data.errors.join('\\n'));
+      btn.textContent = 'Envoyer la réservation';
+      btn.disabled = false;
+    }
+  })
+  .catch(() => {
+    alert('Erreur, reessaie ou envoie un DM Instagram.');
+    btn.textContent = 'Envoyer la réservation';
+    btn.disabled = false;
+  });
+}
+
+// Filters
+document.querySelectorAll('.filters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.filter);
+  });
+});
+
+init();
+</script>
+
+</body>
+</html>
